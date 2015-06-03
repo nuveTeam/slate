@@ -1,10 +1,8 @@
 ---
-title: API Reference
+title: Nuve API Reference
 
 language_tabs:
   - shell
-  - ruby
-  - python
 
 toc_footers:
   - <a href='#'>Sign Up for a Developer Key</a>
@@ -18,151 +16,154 @@ search: true
 
 # Introduction
 
-Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.
+## Summary
+The Nuve Asset Protection API adheres to REST design principals. URLs aim to be predictable, resource oriented, use
+standard HTTP verbs, and return standard HTTP status codes to indicate success or failure.
 
-We have language bindings in Shell, Ruby, and Python! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
+JSON encoding is used for request and response payloads.
 
-This example API documentation page was created with [Slate](http://github.com/tripit/slate). Feel free to edit it and use it as a base for your own API's documentation.
+## Date & time
+
+Date and time are specified and returned in ISO 8601 format:
+
+`YYYY-MM-DDTHH:MM:SSZ`
 
 # Authentication
 
 > To authorize, use this code:
 
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-```
-
 ```shell
-# With shell, you can just pass the correct header with each request
 curl "api_endpoint_here"
-  -H "Authorization: meowmeowmeow"
+  -H "Authorization: nuve.api.token"
 ```
 
-> Make sure to replace `meowmeowmeow` with your API key.
+> Make sure to replace `nuve.api.token` with your API token.
 
-Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our [developer portal](http://example.com/developers).
+API requests are authenticated by specifying your API key on each request. Provide your API key as the basic auth username.
+The password portion is ignored.
 
-Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
+* All API requests MUST be made over HTTPS. All other requests will be dropped.
+* All requests must be authenticated.
 
-`Authorization: meowmeowmeow`
+`Authorization: nuve.api.token`
 
 <aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
+You must replace <code>nuve.api.token</code> with your Nuve API token.
 </aside>
 
-# Kittens
+# Events
 
-## Get All Kittens
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get()
-```
+## Get all events
 
 ```shell
-curl "http://example.com/api/kittens"
-  -H "Authorization: meowmeowmeow"
-```
-
-> The above command returns JSON structured like this:
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Fluffums",
-    "breed": "calico",
-    "fluffiness": 6,
-    "cuteness": 7
-  },
-  {
-    "id": 2,
-    "name": "Isis",
-    "breed": "unknown",
-    "fluffiness": 5,
-    "cuteness": 10
-  }
-]
-```
-
-This endpoint retrieves all kittens.
-
-### HTTP Request
-
-`GET http://example.com/kittens`
-
-### Query Parameters
-
-Parameter | Default | Description
---------- | ------- | -----------
-include_cats | false | If set to true, the result will also include cats.
-available | true | If set to false, the result will include kittens that have already been adopted.
-
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
-</aside>
-
-## Get a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```shell
-curl "http://example.com/api/kittens/3"
-  -H "Authorization: meowmeowmeow"
+curl "https://api.nuve.us/v/events"
+  -H "Authorization: nuve.api.token"
 ```
 
 > The above command returns JSON structured like this:
 
 ```json
 {
-  "id": 2,
-  "name": "Isis",
-  "breed": "unknown",
-  "fluffiness": 5,
-  "cuteness": 10
+  "data": [
+    {
+      "id": "1",
+      "type": "location",
+      "attributes": {
+        "location": {
+          "coordinates": [45.850875, -84.62456]
+        },
+        "gps": {
+          "fixTime": "2015-06-03T22:56:14.256Z"
+        },
+        "metrics": {
+          "fuel.left": 1
+        },
+        "cd": "2015-06-03T22:56:14.148Z",
+        "md": "2015-06-03T22:56:14.148Z"
+      },
+      "relationships": {
+        "asset": {
+          "links": {
+            "related": "https://api.nuve.us/events/1/asset"
+          },
+          "data": {
+            "type": "asset",
+            "id": "1"
+          }
+        }
+      }
+    }
+  ]
 }
 ```
 
-This endpoint retrieves a specific kitten.
+This endpoint retrieves all events for all assets in your organizations. The request additionally can be filtered to
+only include particular assets over a particular time period.
 
-<aside class="warning">If you're not using an administrator API key, note that some kittens will return 403 Forbidden if they are hidden for admins only.</aside>
+### HTTP request
+
+`GET https://api.nuve.us/v/events`
+
+### Query parameters
+
+Parameter | Description
+--------- | -----------
+filter[asset] | Comma seperated list of assets to include in the response
+interval | If provided, the ISO-8601 time interval for which events will be included in the response
+
+## Get a specific event
+
+```shell
+curl "https://api.nuve.us/v/events/3"
+  -H "Authorization: nuve.api.token"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "data": [
+    {
+      "id": "3",
+      "type": "location",
+      "attributes": {
+        "location": {
+          "coordinates": [45.850875, -84.62456]
+        },
+        "gps": {
+          "fixTime": "2015-06-03T22:56:14.256Z"
+        },
+        "metrics": {
+          "fuel.left": 1
+        },
+        "cd": "2015-06-03T22:56:14.148Z",
+        "md": "2015-06-03T22:56:14.148Z"
+      },
+      "relationships": {
+        "asset": {
+          "links": {
+            "related": "https://api.nuve.us/events/1/asset"
+          },
+          "data": {
+            "type": "asset",
+            "id": "1"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+This endpoint retrieves an event specified by its unique identifier.
 
 ### HTTP Request
 
-`GET http://example.com/kittens/<ID>`
+`GET https://api.nuve.us/v/events/{id}`
 
 ### URL Parameters
 
 Parameter | Description
 --------- | -----------
-ID | The ID of the cat to retrieve
+ID | The ID of the event to retrieve
 
