@@ -28,6 +28,23 @@ Date and time are specified and returned in ISO 8601 format:
 
 `YYYY-MM-DDTHH:MM:SSZ`
 
+## Coordinates
+
+Coordinates are always specified in a tuple of either two values, meaning longitude and latitude, or three values
+which specifies longitude, latitude and altitude.
+
+* Longitude: A value between -180 and +180 which represents the east-west position of a point on the Earth's surface.
+* Latitude: A value between -180 and +180 which represents the north-south position of a point on the Earth's surface.
+* Altitude: Specified in kilometers above sea level
+
+### Longitude and latitude
+
+`[45.850875, -84.62456]`
+
+### Longitude, latitude, and altitude
+
+`[45.850875, -84.62456, 657.95]`
+
 # Authentication
 
 > To authorize, use this code:
@@ -76,7 +93,7 @@ curl "https://api.nuve.us/v/events"
           "fixTime": "2015-06-03T22:56:14.256Z"
         },
         "metrics": {
-          "fuel.left": 1
+          "nuve.fuel.left": 1
         },
         "created": "2015-06-03T22:56:14.148Z",
         "modified": "2015-06-03T22:56:14.148Z"
@@ -134,7 +151,7 @@ curl "https://api.nuve.us/v/events/3"
           "fixTime": "2015-06-03T22:56:14.256Z"
         },
         "metrics": {
-          "fuel.left": 1
+          "nuve.fuel.left": 1
         },
         "created": "2015-06-03T22:56:14.148Z",
         "modified": "2015-06-03T22:56:14.148Z"
@@ -157,15 +174,153 @@ curl "https://api.nuve.us/v/events/3"
 
 This endpoint retrieves an event specified by its unique identifier.
 
-### HTTP Request
+### HTTP request
 
 `GET https://api.nuve.us/v/events/{id}`
 
-### URL Parameters
+### URL parameters
 
 Parameter | Description
 --------- | -----------
 ID | The ID of the event to retrieve
+
+## Create an event
+
+```shell
+curl -d \
+'{
+    "data": [
+      {
+        "attributes": {
+          "location": {
+            "coordinates": [45.850875, -84.62456],
+            "speed": 45.6,
+            "heading": 180.1
+          },
+          "gps": {
+            "fixTime": "2015-06-03T22:56:14.256Z"
+          },
+          "metrics": {
+            "nuve.fuel.left": 1
+          }
+        },
+        "relationships": {
+          "asset": {
+            "data": {
+              "type": "asset",
+              "id": "1"
+            }
+          }
+        }
+      }
+    ]
+}' \
+-H "Content-Type: application/json" \
+-H "Authorization: nuve.api.token" \
+-X POST https://api.nuve.us/v/events
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "data": [
+    {
+      "id": "3",
+      "type": "location",
+      "attributes": {
+        "location": {
+          "coordinates": [45.850875, -84.62456],
+          "speed": 45.6,
+          "heading": 180.1
+        },
+        "gps": {
+          "fixTime": "2015-06-03T22:56:14.256Z"
+        },
+        "metrics": {
+          "nuve.fuel.left": 1
+        },
+        "created": "2015-06-03T22:56:14.148Z",
+        "modified": "2015-06-03T22:56:14.148Z"
+      },
+      "relationships": {
+        "asset": {
+          "links": {
+            "related": "https://api.nuve.us/events/1/asset"
+          },
+          "data": {
+            "type": "asset",
+            "id": "1"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+This endpoint creates new location events. Multiple events can be provided in one request. Each event requires that
+an asset be provided
+
+### HTTP request
+
+`POST https://api.nuve.us/v/events`
+
+### HTTP request body
+
+A JSON formatted payload is required. The root element of the document must be `data`.
+
+#### Attributes
+
+If the data originates from a GPS device, `gps` attributes should be included. If the data was sent over a cellular
+connection, `cellular` attributes should be included.
+
+#### Location attributes
+
+Parameter | Description
+--------- | -----------
+location.coordinates | Array of longitude, lattitude, and altitude. See [coordinates](#coordinates)
+location.speed | Speed of the asset in kilometers per hour (KPH)
+location.heading | Heading of the asset in degrees from true north
+
+#### GPS attributes
+
+Parameter | Description
+--------- | -----------
+gps.fixTime | The [date and time](#date-&-time) at which the GPS fix was aquired
+gps.hdop | The GPS horizontal dilution of precision
+gps.sattelites | The number of satellites used to acquire a GPS fix
+
+#### Cellular attributes
+
+Parameter | Description
+--------- | -----------
+cellular.sent | The [date and time](#date-&-time) at which the data was sent by the device
+cellular.signal | The cellular signal strength in Decibel-milliwatts
+cellular.status | Status of the cellular connection, roaming or not roaming
+cellular.carrier | The carrier of the cellular data
+
+#### Metrics attributes
+
+Metrics for the asset, including, but not limited to Nuve sensor and sensor group metrics. Unless otherwise noted metrics
+represent a binary digital signal, a value of `1` indicates that a sensor group is activated and a status of `0` indicates it is
+not:
+
+Metric | Description
+-----  | -----------
+nuve.fuel.{group} | Status of the fuel sensor group and its orientation, for instance, `fuel.left` or `fuel.right`
+nuve.switch.{group} | Status of the unlock switch and its group, e.g. `switch.1`
+nuve.battery | Level of the Nuve battery in volts
+ignition | Status of the vehicle ignition
+door.cargo | Status of the cargo door
+
+#### Relationships
+
+There is only one required relationship when creating an event, the asset that the event relates to:
+
+```{"asset": {"data": {"type": "asset", "id": "1" }}}```
+
+The above code will link the event to the asset with identifier `1`.
 
 # Assets
 
@@ -290,7 +445,7 @@ This endpoint retrieves an asset specified by its unique identifier.
 
 ### HTTP Request
 
-`GET https://api.nuve.us/v/events/{id}`
+`GET https://api.nuve.us/v/assets/{id}`
 
 ### URL Parameters
 
