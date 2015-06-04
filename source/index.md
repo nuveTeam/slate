@@ -78,8 +78,8 @@ curl "https://api.nuve.us/v/events"
         "metrics": {
           "fuel.left": 1
         },
-        "cd": "2015-06-03T22:56:14.148Z",
-        "md": "2015-06-03T22:56:14.148Z"
+        "created": "2015-06-03T22:56:14.148Z",
+        "modified": "2015-06-03T22:56:14.148Z"
       },
       "relationships": {
         "asset": {
@@ -136,8 +136,8 @@ curl "https://api.nuve.us/v/events/3"
         "metrics": {
           "fuel.left": 1
         },
-        "cd": "2015-06-03T22:56:14.148Z",
-        "md": "2015-06-03T22:56:14.148Z"
+        "created": "2015-06-03T22:56:14.148Z",
+        "modified": "2015-06-03T22:56:14.148Z"
       },
       "relationships": {
         "asset": {
@@ -166,4 +166,135 @@ This endpoint retrieves an event specified by its unique identifier.
 Parameter | Description
 --------- | -----------
 ID | The ID of the event to retrieve
+
+# Assets
+
+## Get all assets
+
+```shell
+curl "https://api.nuve.us/v/assets"
+  -H "Authorization: nuve.api.token"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "data": [
+    {
+      "id": "1",
+      "type": "asset",
+      "attributes": {
+        "classification": "truck",
+        "name": "Truck 110",
+        "slug": null,
+        "description": null,
+        "created": "2015-06-04T17:30:22.309Z",
+        "modified": "2015-06-04T17:30:22.309Z",
+        "tags": [],
+        "permissions": []
+      },
+      "relationships": {
+        "authorizations": {
+          "links": {
+            "related": "https://api.nuve.us/assets/1/authorizations"
+          },
+          "data": [
+            {
+              "type": "authorization",
+              "id": "19"
+            }
+          ]
+        },
+        "org": {
+          "links": {
+            "related": "https://api.nuve.us/assets/1/org"
+          },
+          "data": {
+            "type": "org",
+            "id": "17"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+This endpoint retrieves all assets in your organization. The request can also be filtered to particular organizations
+under your organization.
+
+### HTTP request
+
+`GET https://api.nuve.us/v/assets`
+
+### Query parameters
+
+Parameter | Description
+--------- | -----------
+filter[org] | Comma seperated list of organization IDs to include assets for in the response
+
+## Get a specific asset
+
+```shell
+curl "https://api.nuve.us/v/assets/3"
+  -H "Authorization: nuve.api.token"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "data": [
+    {
+      "id": "3",
+      "type": "asset",
+      "attributes": {
+        "classification": "trailer",
+        "name": "Truck 119",
+        "slug": null,
+        "description": null,
+        "created": "2015-06-04T17:30:22.309Z",
+        "modified": "2015-06-04T17:30:22.309Z",
+        "tags": [],
+        "permissions": []
+      },
+      "relationships": {
+        "authorizations": {
+          "links": {
+            "related": "https://api.nuve.us/assets/3/authorizations"
+          },
+          "data": [
+            {
+              "type": "authorization",
+              "id": "19"
+            }
+          ]
+        },
+        "org": {
+          "links": {
+            "related": "https://api.nuve.us/assets/3/org"
+          },
+          "data": {
+            "type": "org",
+            "id": "17"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+This endpoint retrieves an asset specified by its unique identifier.
+
+### HTTP Request
+
+`GET https://api.nuve.us/v/events/{id}`
+
+### URL Parameters
+
+Parameter | Description
+--------- | -----------
+ID | The ID of the asset to retrieve
 
