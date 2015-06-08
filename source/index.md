@@ -5,8 +5,7 @@ language_tabs:
   - shell
 
 toc_footers:
-  - <a href='#'>Sign Up for a Developer Key</a>
-  - <a href='http://github.com/tripit/slate'>Documentation Powered by Slate</a>
+  - <a href='/schema.html'>API schema</a>
 
 includes:
   - errors
@@ -308,8 +307,8 @@ not:
 
 Metric | Description
 -----  | -----------
-nuve.fuel.{group} | Status of the fuel sensor group and its orientation, for instance, `fuel.left` or `fuel.right`
-nuve.switch.{group} | Status of the unlock switch and its group, e.g. `switch.1`
+nuve.fuel.{group} | Status of the fuel sensor group and its orientation, for instance, `nuve.fuel.left` or `nuve.fuel.right`
+nuve.switch.{group} | Status of the unlock switch and its group, e.g. `nuve.switch.1`
 nuve.battery | Level of the Nuve battery in volts
 ignition | Status of the vehicle ignition
 door.cargo | Status of the cargo door
