@@ -21,6 +21,30 @@ standard HTTP verbs, and return standard HTTP status codes to indicate success o
 
 JSON encoding is used for request and response payloads.
 
+## Response format
+
+> A successful request and response
+
+```json
+{
+  "data": []
+}
+```
+
+> A problem with the request or response
+
+```json
+{
+  "error": {}
+}
+```
+
+All JSON response formats take has one of the following root elements:
+
+* `data`: indicates a successful request and response. The data attribute will contain the requested resource(s).
+* `error`: indicates a problem with the request or the server encountered an issue generating the response. See [errors](#errors) for more info.
+
+
 ## Date & time
 
 Date and time are specified and returned in ISO 8601 format:
@@ -44,13 +68,19 @@ which specifies longitude, latitude and altitude.
 
 `[45.850875, -84.62456, 657.95]`
 
+# API schema
+
+The Nuve API has a schema provided in [Swagger](http://swagger.io/) format. The schema can be utilized
+to generate API clients in many different languages utilizing the [Swagger Editor](http://editor.swagger.io/). Additional
+API endpoints are also available, above and beyond what is disccused in this documentation, and available for browsing [here](/schema.html).
+
 # Authentication
 
 > To authorize, use this code:
 
 ```shell
 curl "api_endpoint_here"
-  -H "Authorization: nuve.api.token"
+  -u "nuve.api.token:"
 ```
 
 > Make sure to replace `nuve.api.token` with your API token.
@@ -73,10 +103,17 @@ You must replace <code>nuve.api.token</code> with your Nuve API token.
 
 ```shell
 curl "https://api.nuve.us/v/events"
-  -H "Authorization: nuve.api.token"
+  -u "nuve.api.token:"
 ```
 
-> The above command returns JSON structured like this:
+> Filter the returned events by an asset with ID `1`:
+
+```shell
+curl "https://api.nuve.us/v/events?filter[asset]=1"
+  -u "nuve.api.token:"
+```
+
+> The above command returns JSON structured as follows:
 
 ```json
 {
@@ -85,6 +122,7 @@ curl "https://api.nuve.us/v/events"
       "id": "1",
       "type": "location",
       "attributes": {
+        "generated": "2015-06-03T22:56:14.256Z",
         "location": {
           "coordinates": [45.850875, -84.62456]
         },
@@ -94,13 +132,12 @@ curl "https://api.nuve.us/v/events"
         "metrics": {
           "nuve.fuel.left": 1
         },
-        "created": "2015-06-03T22:56:14.148Z",
-        "modified": "2015-06-03T22:56:14.148Z"
+        "created": "2015-06-03T22:56:14.148Z"
       },
       "relationships": {
         "asset": {
           "links": {
-            "related": "https://api.nuve.us/events/1/asset"
+            "related": "https://api.nuve.us/v/events/1/asset"
           },
           "data": {
             "type": "asset",
@@ -131,10 +168,10 @@ interval | If provided, the ISO-8601 time interval for which events will be incl
 
 ```shell
 curl "https://api.nuve.us/v/events/3"
-  -H "Authorization: nuve.api.token"
+  -u "nuve.api.token:"
 ```
 
-> The above command returns JSON structured like this:
+> The above commands returns JSON structured as follows:
 
 ```json
 {
@@ -143,6 +180,7 @@ curl "https://api.nuve.us/v/events/3"
       "id": "3",
       "type": "location",
       "attributes": {
+        "generated": "2015-06-03T22:56:14.256Z",
         "location": {
           "coordinates": [45.850875, -84.62456]
         },
@@ -158,7 +196,7 @@ curl "https://api.nuve.us/v/events/3"
       "relationships": {
         "asset": {
           "links": {
-            "related": "https://api.nuve.us/events/1/asset"
+            "related": "https://api.nuve.us/v/events/1/asset"
           },
           "data": {
             "type": "asset",
@@ -191,6 +229,7 @@ curl -d \
     "data": [
       {
         "attributes": {
+          "generated": "2015-06-03T22:56:14.256Z",
           "location": {
             "coordinates": [45.850875, -84.62456],
             "speed": 45.6,
@@ -215,7 +254,7 @@ curl -d \
     ]
 }' \
 -H "Content-Type: application/json" \
--H "Authorization: nuve.api.token" \
+-u "nuve.api.token:" \
 -X POST https://api.nuve.us/v/events
 ```
 
@@ -228,6 +267,7 @@ curl -d \
       "id": "3",
       "type": "location",
       "attributes": {
+        "generated": "2015-06-03T22:56:14.256Z",
         "location": {
           "coordinates": [45.850875, -84.62456],
           "speed": 45.6,
@@ -245,7 +285,7 @@ curl -d \
       "relationships": {
         "asset": {
           "links": {
-            "related": "https://api.nuve.us/events/1/asset"
+            "related": "https://api.nuve.us/v/events/1/asset"
           },
           "data": {
             "type": "asset",
@@ -274,6 +314,10 @@ A JSON formatted payload is required. The root element of the document must be `
 If the data originates from a GPS device, `gps` attributes should be included. If the data was sent over a cellular
 connection, `cellular` attributes should be included.
 
+Parameter | Description
+--------- | -----------
+generated | The [date and time](#date-&-time) at which the event was generated
+
 #### Location attributes
 
 Parameter | Description
@@ -294,7 +338,6 @@ gps.sattelites | The number of satellites used to acquire a GPS fix
 
 Parameter | Description
 --------- | -----------
-cellular.sent | The [date and time](#date-&-time) at which the data was sent by the device
 cellular.signal | The cellular signal strength in Decibel-milliwatts
 cellular.status | Status of the cellular connection, roaming or not roaming
 cellular.carrier | The carrier of the cellular data
@@ -310,6 +353,8 @@ Metric | Description
 nuve.fuel.{group} | Status of the fuel sensor group and its orientation, for instance, `nuve.fuel.left` or `nuve.fuel.right`
 nuve.switch.{group} | Status of the unlock switch and its group, e.g. `nuve.switch.1`
 nuve.battery | Level of the Nuve battery in volts
+nuve.bolt.{id} | Status of the Nuve cargo bolt, with the given identifier: `nuve.bolt.0`
+nuve.lock.{id} | Status of the Nuve cargo lock permission, a value of `1` indicating permission is granted `0` meaning permission is not granted
 ignition | Status of the vehicle ignition
 door.cargo | Status of the cargo door
 
@@ -327,7 +372,7 @@ The above code will link the event to the asset with identifier `1`.
 
 ```shell
 curl "https://api.nuve.us/v/assets"
-  -H "Authorization: nuve.api.token"
+  -u "nuve.api.token:"
 ```
 
 > The above command returns JSON structured like this:
@@ -351,7 +396,7 @@ curl "https://api.nuve.us/v/assets"
       "relationships": {
         "authorizations": {
           "links": {
-            "related": "https://api.nuve.us/assets/1/authorizations"
+            "related": "https://api.nuve.us/v/assets/1/authorizations"
           },
           "data": [
             {
@@ -362,7 +407,7 @@ curl "https://api.nuve.us/v/assets"
         },
         "org": {
           "links": {
-            "related": "https://api.nuve.us/assets/1/org"
+            "related": "https://api.nuve.us/v/assets/1/org"
           },
           "data": {
             "type": "org",
@@ -392,7 +437,7 @@ filter[org] | Comma seperated list of organization IDs to include assets for in 
 
 ```shell
 curl "https://api.nuve.us/v/assets/3"
-  -H "Authorization: nuve.api.token"
+  -u "nuve.api.token:"
 ```
 
 > The above command returns JSON structured like this:
@@ -416,7 +461,7 @@ curl "https://api.nuve.us/v/assets/3"
       "relationships": {
         "authorizations": {
           "links": {
-            "related": "https://api.nuve.us/assets/3/authorizations"
+            "related": "https://api.nuve.us/v/assets/3/authorizations"
           },
           "data": [
             {
@@ -427,7 +472,7 @@ curl "https://api.nuve.us/v/assets/3"
         },
         "org": {
           "links": {
-            "related": "https://api.nuve.us/assets/3/org"
+            "related": "https://api.nuve.us/v/assets/3/org"
           },
           "data": {
             "type": "org",
