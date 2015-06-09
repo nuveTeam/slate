@@ -162,7 +162,8 @@ only include particular assets over a particular time period.
 Parameter | Description
 --------- | -----------
 filter[asset] | Comma seperated list of assets to include in the response
-interval | If provided, the ISO-8601 time interval for which events will be included in the response
+filter[created] | If provided, the ISO-8601 time interval for which events will be included in the response, based upon their creation date and time
+filter[generated] | If provided, the ISO-8601 time interval for which events will be included in the response, based upon their generated date and time
 
 ## Get a specific event
 
